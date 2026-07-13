@@ -22,11 +22,14 @@
         <div class="actions actions-between">
           <div>
             <h1>学習ログ一覧</h1>
-            <p class="meta">登録済みの学習ログを日付降順で表示します。</p>
+            <p class="meta">登録済みの学習ログを日付降順で表示します。ログをクリックすると編集画面へ移動します。</p>
           </div>
           <a class="button" href="/logs/new/">新規登録</a>
         </div>
-        <div class="log-list" data-log-list aria-label="学習ログ一覧"></div>
+        <p class="loading" data-log-loading role="status">学習ログを読み込んでいます...</p>
+        <p class="alert" data-log-error role="alert" hidden></p>
+        <p class="meta" data-log-count></p>
+        <div class="log-list" data-log-list aria-label="学習ログ一覧" hidden></div>
       </section>
     </main>
     <script src="/assets/app.js"></script>

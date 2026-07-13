@@ -19,8 +19,8 @@
     </header>
     <main class="container">
       <section class="card">
-        <h1>学習ログ登録</h1>
-        <p class="meta">学習した内容を入力して登録してください。</p>
+        <h1 data-form-title>学習ログ登録</h1>
+        <p class="meta" data-form-description>学習した内容を入力して登録してください。</p>
         <p class="alert" data-submit-error role="alert" hidden></p>
         <form class="form" data-log-form novalidate>
           <div class="field">
@@ -53,7 +53,7 @@
             <textarea id="memo" name="memo"></textarea>
           </div>
           <div class="actions">
-            <button class="button" type="submit">登録する</button>
+            <button class="button" data-submit-button type="submit">登録する</button>
             <a href="/logs/">キャンセル</a>
           </div>
         </form>
