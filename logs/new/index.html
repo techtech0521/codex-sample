@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>学習ログ登録 | Study Log</title>
+    <link rel="stylesheet" href="/assets/styles.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav" aria-label="主要ナビゲーション">
+        <a class="brand" href="/">Study Log</a>
+        <div class="nav-links">
+          <a href="/">ホーム</a>
+          <a href="/logs/">ログ一覧</a>
+          <a href="/logs/new/">ログ登録</a>
+        </div>
+      </nav>
+    </header>
+    <main class="container">
+      <section class="card">
+        <h1>学習ログ登録</h1>
+        <p class="meta">学習した内容を入力して登録してください。</p>
+        <p class="alert" data-submit-error role="alert" hidden></p>
+        <form class="form" data-log-form novalidate>
+          <div class="field">
+            <label for="date">学習日</label>
+            <input id="date" name="date" type="date" required>
+            <p class="error" data-error-for="date"></p>
+          </div>
+          <div class="field">
+            <label for="title">タイトル</label>
+            <input id="title" maxlength="255" name="title" type="text" required>
+            <p class="error" data-error-for="title"></p>
+          </div>
+          <div class="field">
+            <label for="category">カテゴリ</label>
+            <select id="category" name="category" required>
+              <option value="英語">英語</option>
+              <option value="プログラミング">プログラミング</option>
+              <option value="資格">資格</option>
+              <option value="読書">読書</option>
+            </select>
+            <p class="error" data-error-for="category"></p>
+          </div>
+          <div class="field">
+            <label for="durationMinutes">学習時間（分）</label>
+            <input id="durationMinutes" min="1" name="durationMinutes" step="1" type="number" value="30" required>
+            <p class="error" data-error-for="durationMinutes"></p>
+          </div>
+          <div class="field">
+            <label for="memo">メモ</label>
+            <textarea id="memo" name="memo"></textarea>
+          </div>
+          <div class="actions">
+            <button class="button" type="submit">登録する</button>
+            <a href="/logs/">キャンセル</a>
+          </div>
+        </form>
+      </section>
+    </main>
+    <script src="/assets/app.js"></script>
+  </body>
+</html>
