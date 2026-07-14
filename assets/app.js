@@ -33,6 +33,10 @@ function saveLearningLog(input) {
   return log;
 }
 
+function findLearningLog(id) {
+  return getLearningLogs().find((log) => log.id === id);
+}
+
 function updateLearningLog(id, input) {
   const logs = getLearningLogs();
   const index = logs.findIndex((log) => log.id === id);
@@ -49,6 +53,16 @@ function updateLearningLog(id, input) {
   logs[index] = updatedLog;
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
   return updatedLog;
+}
+
+function deleteLearningLog(id) {
+  const logs = getLearningLogs();
+  const nextLogs = logs.filter((log) => log.id !== id);
+  if (nextLogs.length === logs.length) {
+    throw new Error('削除対象の学習ログが見つかりません。');
+  }
+
+  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextLogs));
 }
 
 function formatDuration(minutes) {
@@ -116,7 +130,7 @@ function renderLogsPage() {
 
       if (count) count.textContent = `${logs.length}件の学習ログを表示しています。`;
       list.innerHTML = logs.map((log) => `
-        <a class="log-item log-link" href="/logs/new/?id=${encodeURIComponent(log.id)}" aria-label="${escapeHtml(log.title)}を編集する">
+        <a class="log-item log-link" href="/logs/edit/?id=${encodeURIComponent(log.id)}" aria-label="${escapeHtml(log.title)}を編集する">
           <div class="log-item-header">
             <p class="meta">${escapeHtml(formatDate(log.date))}</p>
             <span class="category-badge">${escapeHtml(log.category)}</span>
@@ -146,31 +160,60 @@ function renderLogsPage() {
   }, 0);
 }
 
-function setupNewLogForm() {
+function setupLogForm() {
   const form = document.querySelector('[data-log-form]');
   if (!form) return;
 
   const params = new URLSearchParams(window.location.search);
   const editingId = params.get('id');
+  const isEditPage = window.location.pathname.startsWith('/logs/edit/');
   const dateInput = form.elements.date;
   const heading = document.querySelector('[data-form-title]');
   const description = document.querySelector('[data-form-description]');
   const submitButton = form.querySelector('[data-submit-button]');
+  const deleteButton = form.querySelector('[data-delete-button]');
 
   dateInput.value = new Date().toISOString().slice(0, 10);
 
+  if (isEditPage && !editingId) {
+    showSubmitError('編集対象の学習ログIDが指定されていません。');
+    form.hidden = true;
+    return;
+  }
+
   if (editingId) {
-    const editingLog = getLearningLogs().find((log) => log.id === editingId);
-    if (editingLog) {
-      if (heading) heading.textContent = '学習ログ編集';
-      if (description) description.textContent = '登録済みの学習ログを編集できます。';
-      if (submitButton) submitButton.textContent = '更新する';
-      form.elements.date.value = editingLog.date || '';
-      form.elements.title.value = editingLog.title || '';
-      form.elements.category.value = editingLog.category || categories[0];
-      form.elements.durationMinutes.value = editingLog.durationMinutes || 30;
-      form.elements.memo.value = editingLog.memo || '';
+    const editingLog = findLearningLog(editingId);
+    if (!editingLog) {
+      showSubmitError('編集対象の学習ログが見つかりません。');
+      form.hidden = true;
+      return;
     }
+
+    if (heading) heading.textContent = '学習ログ編集';
+    if (description) description.textContent = '登録済みの学習ログを編集・削除できます。';
+    if (submitButton) submitButton.textContent = '更新する';
+    if (deleteButton) deleteButton.hidden = false;
+    form.elements.date.value = editingLog.date || '';
+    form.elements.title.value = editingLog.title || '';
+    form.elements.category.value = editingLog.category || categories[0];
+    form.elements.durationMinutes.value = editingLog.durationMinutes || 30;
+    form.elements.memo.value = editingLog.memo || '';
+  }
+
+  if (deleteButton) {
+    deleteButton.addEventListener('click', () => {
+      if (!editingId) return;
+      const confirmed = window.confirm('この学習ログを削除します。よろしいですか？');
+      if (!confirmed) return;
+
+      try {
+        deleteLearningLog(editingId);
+        window.location.href = '/logs/';
+      } catch (error) {
+        const message = error instanceof Error ? error.message : '学習ログの削除に失敗しました。';
+        showSubmitError(message);
+      }
+    });
   }
 
   form.addEventListener('submit', (event) => {
@@ -204,8 +247,7 @@ function setupNewLogForm() {
       window.location.href = '/logs/';
     } catch (error) {
       const message = error instanceof Error ? error.message : '学習ログの保存に失敗しました。';
-      document.querySelector('[data-submit-error]').textContent = message;
-      document.querySelector('[data-submit-error]').hidden = false;
+      showSubmitError(message);
     }
   });
 }
@@ -232,6 +274,13 @@ function clearErrors(form) {
   }
 }
 
+function showSubmitError(message) {
+  const submitError = document.querySelector('[data-submit-error]');
+  if (!submitError) return;
+  submitError.textContent = message;
+  submitError.hidden = false;
+}
+
 function showErrors(errors) {
   Object.entries(errors).forEach(([name, message]) => {
     const node = document.querySelector(`[data-error-for="${name}"]`);
@@ -249,5 +298,5 @@ function escapeHtml(value) {
   }[char]));
 }
 
-setupNewLogForm();
+setupLogForm();
 renderLogsPage();
