@@ -26,6 +26,7 @@ textarea { min-height: 128px; resize: vertical; }
 .button { background: #1f5eff; border: 0; border-radius: 999px; color: #fff; cursor: pointer; display: inline-block; font: inherit; font-weight: 700; padding: 12px 20px; }
 .button:disabled { cursor: not-allowed; opacity: 0.65; }
 .secondary { background: #eef2ff; color: #1f5eff; }
+.danger { background: #b42318; }
 .log-list { display: grid; gap: 12px; margin-top: 20px; }
 .log-item { border: 1px solid #e5e9f2; border-radius: 12px; padding: 16px; }
 .meta { color: #61708a; font-size: 0.9rem; }
