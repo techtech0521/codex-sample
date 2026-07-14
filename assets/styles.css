@@ -44,3 +44,15 @@ textarea { min-height: 128px; resize: vertical; }
 .log-summary dt { color: #61708a; font-size: 0.85rem; font-weight: 700; }
 .log-summary dd { margin: 0; }
 @media (min-width: 720px) { .log-summary { grid-template-columns: 160px 1fr; } }
+.summary-card { margin-top: 24px; }
+.section-header { align-items: flex-start; display: flex; justify-content: space-between; gap: 16px; }
+.section-header h2 { margin-bottom: 8px; margin-top: 0; }
+.summary-grid { display: grid; gap: 12px; margin: 20px 0; }
+.summary-item { background: #f8fafc; border: 1px solid #e5e9f2; border-radius: 12px; padding: 16px; }
+.summary-item dt, .category-total dt { color: #61708a; font-size: 0.9rem; font-weight: 700; }
+.summary-item dd { color: #172033; font-size: 1.6rem; font-weight: 800; margin: 8px 0 0; }
+.category-totals { display: grid; gap: 10px; margin: 12px 0 0; }
+.category-total { align-items: center; border-bottom: 1px solid #e5e9f2; display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; }
+.category-total dd { font-weight: 700; margin: 0; }
+.summary-empty { margin-top: 20px; }
+@media (min-width: 720px) { .summary-grid { grid-template-columns: repeat(3, 1fr); } }

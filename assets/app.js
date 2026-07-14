@@ -66,8 +66,9 @@ function deleteLearningLog(id) {
 }
 
 function formatDuration(minutes) {
-  const hours = Math.floor(minutes / 60);
-  const rest = minutes % 60;
+  const safeMinutes = Number.isFinite(minutes) ? Math.max(0, Math.floor(minutes)) : 0;
+  const hours = Math.floor(safeMinutes / 60);
+  const rest = safeMinutes % 60;
   return hours > 0 ? `${hours}時間 ${rest}分` : `${rest}分`;
 }
 
@@ -82,12 +83,111 @@ function formatDate(dateString) {
   }).format(date);
 }
 
+function toDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getMonday(date) {
+  const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const day = monday.getDay();
+  const diff = day === 0 ? -6 : 1 - day;
+  monday.setDate(monday.getDate() + diff);
+  return monday;
+}
+
+function getStudySummary(logs, baseDate = new Date()) {
+  const todayKey = toDateKey(baseDate);
+  const weekStartKey = toDateKey(getMonday(baseDate));
+  const monthStartKey = `${baseDate.getFullYear()}-${String(baseDate.getMonth() + 1).padStart(2, '0')}-01`;
+
+  return logs.reduce((summary, log) => {
+    const date = String(log.date || '');
+    const durationMinutes = Number(log.durationMinutes);
+    const minutes = Number.isFinite(durationMinutes) && durationMinutes > 0 ? durationMinutes : 0;
+    const category = String(log.category || '未分類');
+
+    if (date === todayKey) summary.todayMinutes += minutes;
+    if (date >= weekStartKey && date <= todayKey) summary.weekMinutes += minutes;
+    if (date >= monthStartKey && date <= todayKey) summary.monthMinutes += minutes;
+
+    summary.categoryMinutes.set(category, (summary.categoryMinutes.get(category) || 0) + minutes);
+    return summary;
+  }, {
+    todayMinutes: 0,
+    weekMinutes: 0,
+    monthMinutes: 0,
+    categoryMinutes: new Map(),
+  });
+}
+
 function getMemoExcerpt(memo, maxLength = 80) {
   if (!memo) return 'メモはありません。';
   const normalizedMemo = String(memo).replace(/\s+/g, ' ').trim();
   return normalizedMemo.length > maxLength
     ? `${normalizedMemo.slice(0, maxLength)}…`
     : normalizedMemo;
+}
+
+function renderHomeSummary() {
+  const summaryRoot = document.querySelector('[data-study-summary]');
+  if (!summaryRoot) return;
+
+  const loading = document.querySelector('[data-summary-loading]');
+  const error = document.querySelector('[data-summary-error]');
+  const empty = document.querySelector('[data-summary-empty]');
+  const today = document.querySelector('[data-summary-today]');
+  const week = document.querySelector('[data-summary-week]');
+  const month = document.querySelector('[data-summary-month]');
+  const categoryList = document.querySelector('[data-summary-categories]');
+
+  if (loading) loading.hidden = false;
+  if (error) {
+    error.hidden = true;
+    error.textContent = '';
+  }
+  if (empty) empty.hidden = true;
+  summaryRoot.hidden = true;
+
+  window.setTimeout(() => {
+    try {
+      const logs = readLearningLogs();
+      const summary = getStudySummary(logs);
+      if (loading) loading.hidden = true;
+      summaryRoot.hidden = false;
+
+      if (today) today.textContent = formatDuration(summary.todayMinutes);
+      if (week) week.textContent = formatDuration(summary.weekMinutes);
+      if (month) month.textContent = formatDuration(summary.monthMinutes);
+
+      const categoryEntries = [...summary.categoryMinutes.entries()]
+        .filter(([, minutes]) => minutes > 0)
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'ja'));
+
+      if (categoryList) {
+        categoryList.innerHTML = categoryEntries.length > 0
+          ? categoryEntries.map(([category, minutes]) => `
+            <div class="category-total">
+              <dt>${escapeHtml(category)}</dt>
+              <dd>${escapeHtml(formatDuration(minutes))}</dd>
+            </div>
+          `).join('')
+          : '<div class="category-total"><dt>カテゴリ別</dt><dd>0分</dd></div>';
+      }
+
+      if (empty) empty.hidden = logs.length > 0;
+    } catch (caughtError) {
+      if (loading) loading.hidden = true;
+      summaryRoot.hidden = true;
+      if (error) {
+        const message = caughtError instanceof Error ? caughtError.message : '学習時間の集計に失敗しました。';
+        error.textContent = message;
+        error.hidden = false;
+      }
+    }
+  }, 0);
 }
 
 function renderLogsPage() {
@@ -300,3 +400,4 @@ function escapeHtml(value) {
 
 setupLogForm();
 renderLogsPage();
+renderHomeSummary();
