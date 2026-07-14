@@ -26,6 +26,40 @@
           <a class="button secondary" href="/logs/">すべてのログを見る</a>
         </div>
       </section>
+
+      <section class="card summary-card" aria-labelledby="summary-title">
+        <div class="section-header">
+          <div>
+            <h2 id="summary-title">学習時間の集計</h2>
+            <p class="meta">登録済みの学習ログから、今日・今週・今月・カテゴリ別の合計学習時間を表示します。</p>
+          </div>
+        </div>
+        <p class="loading" data-summary-loading role="status">学習時間を集計しています...</p>
+        <p class="alert" data-summary-error role="alert" hidden></p>
+        <div data-study-summary hidden>
+          <dl class="summary-grid" aria-label="期間別の学習時間">
+            <div class="summary-item">
+              <dt>今日</dt>
+              <dd data-summary-today>0分</dd>
+            </div>
+            <div class="summary-item">
+              <dt>今週</dt>
+              <dd data-summary-week>0分</dd>
+            </div>
+            <div class="summary-item">
+              <dt>今月</dt>
+              <dd data-summary-month>0分</dd>
+            </div>
+          </dl>
+          <h3>カテゴリ別</h3>
+          <dl class="category-totals" data-summary-categories aria-label="カテゴリ別の学習時間"></dl>
+          <div class="empty-state summary-empty" data-summary-empty hidden>
+            <p>まだ学習ログがありません。最初のログを登録すると集計が表示されます。</p>
+            <a class="button" href="/logs/new/">学習ログを登録する</a>
+          </div>
+        </div>
+      </section>
     </main>
+    <script src="/assets/app.js"></script>
   </body>
 </html>
